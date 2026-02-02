@@ -159,13 +159,13 @@ export const updateBlog = async (req, res) => {
     res.json(blog);
   } catch (error) {
     console.error("Update blog error:", error);
-    
+
     // Handle validation errors
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map(err => err.message);
-      return res.status(400).json({ message: messages.join(', ') });
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((err) => err.message);
+      return res.status(400).json({ message: messages.join(", ") });
     }
-    
+
     res.status(500).json({ message: error.message || "Failed to update blog" });
   }
 };
