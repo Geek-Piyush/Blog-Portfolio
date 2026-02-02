@@ -6,7 +6,9 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required" });
+      return res
+        .status(400)
+        .json({ message: "Email and password are required" });
     }
 
     // Trim credentials to handle whitespace
@@ -14,12 +16,6 @@ export const login = async (req, res) => {
     const trimmedPassword = password.trim();
     const adminEmail = config.ADMIN_EMAIL?.trim();
     const adminPassword = config.ADMIN_PASSWORD?.trim();
-
-    // Debug logging (only log that check happened, not the actual values for security)
-    console.log('Login attempt - Email match:', trimmedEmail === adminEmail);
-    console.log('Login attempt - Password match:', trimmedPassword === adminPassword);
-    console.log('Admin email configured:', !!adminEmail);
-    console.log('Admin password configured:', !!adminPassword);
 
     // Check against environment variables
     if (trimmedEmail !== adminEmail || trimmedPassword !== adminPassword) {
@@ -30,7 +26,7 @@ export const login = async (req, res) => {
     const token = jwt.sign(
       { email: adminEmail, isAdmin: true },
       config.JWT_SECRET,
-      { expiresIn: config.JWT_EXPIRES_IN }
+      { expiresIn: config.JWT_EXPIRES_IN },
     );
 
     res.json({
