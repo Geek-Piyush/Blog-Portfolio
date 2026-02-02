@@ -3,8 +3,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
-import Underline from "@tiptap/extension-underline";
-import Link from "@tiptap/extension-link";
 import { TextStyle } from "@tiptap/extension-text-style";
 import {
   getBlog,
@@ -81,10 +79,6 @@ const BlogEditor = () => {
       Placeholder.configure({
         placeholder:
           "Start writing your blog post... (Right-click for formatting options, drag & drop images)",
-      }),
-      Underline,
-      Link.configure({
-        openOnClick: false,
       }),
       TextStyle,
       FontFamily,
