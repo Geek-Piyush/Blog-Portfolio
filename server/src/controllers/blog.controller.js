@@ -17,9 +17,7 @@ export const getAllBlogs = async (req, res) => {
 // Get all blogs for admin (including drafts)
 export const getAllBlogsAdmin = async (req, res) => {
   try {
-    const blogs = await Blog.find()
-      .select("-content")
-      .sort({ createdAt: -1 });
+    const blogs = await Blog.find().select("-content").sort({ createdAt: -1 });
     res.json(blogs);
   } catch (error) {
     console.error("Get all blogs admin error:", error);
@@ -64,17 +62,33 @@ export const getBlogById = async (req, res) => {
 // Create blog
 export const createBlog = async (req, res) => {
   try {
-    const { title, slug, content, coverImage, images, tags, published } = req.body;
+    const { title, slug, content, coverImage, images, tags, published } =
+      req.body;
+
+    // Validate required fields
+    if (!title?.trim()) {
+      return res.status(400).json({ message: "Title is required" });
+    }
+
+    if (!slug?.trim()) {
+      return res.status(400).json({ message: "Slug is required" });
+    }
+
+    if (!content?.trim()) {
+      return res.status(400).json({ message: "Content is required" });
+    }
 
     // Check if slug already exists
     const existingBlog = await Blog.findOne({ slug });
     if (existingBlog) {
-      return res.status(400).json({ message: "A blog with this slug already exists" });
+      return res
+        .status(400)
+        .json({ message: "A blog with this slug already exists" });
     }
 
     const blog = new Blog({
-      title,
-      slug,
+      title: title.trim(),
+      slug: slug.trim(),
       content,
       coverImage: coverImage || { url: "", publicId: "" },
       images: images || [],
@@ -86,7 +100,14 @@ export const createBlog = async (req, res) => {
     res.status(201).json(blog);
   } catch (error) {
     console.error("Create blog error:", error);
-    res.status(500).json({ message: "Failed to create blog" });
+
+    // Handle validation errors
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((err) => err.message);
+      return res.status(400).json({ message: messages.join(", ") });
+    }
+
+    res.status(500).json({ message: error.message || "Failed to create blog" });
   }
 };
 
@@ -94,24 +115,40 @@ export const createBlog = async (req, res) => {
 export const updateBlog = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, slug, content, coverImage, images, tags, published } = req.body;
+    const { title, slug, content, coverImage, images, tags, published } =
+      req.body;
 
     const blog = await Blog.findById(id);
     if (!blog) {
       return res.status(404).json({ message: "Blog not found" });
     }
 
+    // Validate required fields
+    if (title !== undefined && !title?.trim()) {
+      return res.status(400).json({ message: "Title cannot be empty" });
+    }
+
+    if (slug !== undefined && !slug?.trim()) {
+      return res.status(400).json({ message: "Slug cannot be empty" });
+    }
+
+    if (content !== undefined && !content?.trim()) {
+      return res.status(400).json({ message: "Content cannot be empty" });
+    }
+
     // Check if new slug conflicts with another blog
     if (slug && slug !== blog.slug) {
       const existingBlog = await Blog.findOne({ slug });
       if (existingBlog) {
-        return res.status(400).json({ message: "A blog with this slug already exists" });
+        return res
+          .status(400)
+          .json({ message: "A blog with this slug already exists" });
       }
     }
 
     // Update fields
-    if (title !== undefined) blog.title = title;
-    if (slug !== undefined) blog.slug = slug;
+    if (title !== undefined) blog.title = title.trim();
+    if (slug !== undefined) blog.slug = slug.trim();
     if (content !== undefined) blog.content = content;
     if (coverImage !== undefined) blog.coverImage = coverImage;
     if (images !== undefined) blog.images = images;
@@ -122,7 +159,14 @@ export const updateBlog = async (req, res) => {
     res.json(blog);
   } catch (error) {
     console.error("Update blog error:", error);
-    res.status(500).json({ message: "Failed to update blog" });
+    
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({ message: messages.join(', ') });
+    }
+    
+    res.status(500).json({ message: error.message || "Failed to update blog" });
   }
 };
 

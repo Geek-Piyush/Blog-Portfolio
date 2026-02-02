@@ -512,6 +512,24 @@ const BlogEditor = () => {
   // Submit - upload all images then save
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate required fields
+    if (!formData.title?.trim()) {
+      toast.error("Please enter a blog title");
+      return;
+    }
+
+    if (!formData.slug?.trim()) {
+      toast.error("Blog slug is required");
+      return;
+    }
+
+    const content = editor?.getHTML() || formData.content;
+    if (!content?.trim() || content === "<p></p>") {
+      toast.error("Please add some content to your blog");
+      return;
+    }
+
     setSaving(true);
 
     try {
